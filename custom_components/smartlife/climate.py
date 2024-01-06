@@ -147,7 +147,7 @@ class SmartLifeClimateEntity(SmartLifeEntity, ClimateEntity):
         ) or all(
             dpcode in device.status for dpcode in (DPCode.TEMP_SET, DPCode.TEMP_SET_F)
         ):
-            prefered_temperature_unit = UnitOfTemperature.CELSIUS
+            prefered_temperature_unit = UnitOfTemperature.FAHRENHEIT
             if any(
                 "f" in device.status[dpcode].lower()
                 for dpcode in (DPCode.C_F, DPCode.TEMP_UNIT_CONVERT)
@@ -156,7 +156,7 @@ class SmartLifeClimateEntity(SmartLifeEntity, ClimateEntity):
                 prefered_temperature_unit = UnitOfTemperature.FAHRENHEIT
 
         # Default to Celsius
-        self._attr_temperature_unit = UnitOfTemperature.CELSIUS
+        self._attr_temperature_unit = UnitOfTemperature.FAHRENHEIT
 
         # Figure out current temperature, use preferred unit or what is available
         celsius_type = self.find_dpcode(
@@ -168,14 +168,14 @@ class SmartLifeClimateEntity(SmartLifeEntity, ClimateEntity):
         if fahrenheit_type and (
             prefered_temperature_unit == UnitOfTemperature.FAHRENHEIT
             or (
-                prefered_temperature_unit == UnitOfTemperature.CELSIUS
+                prefered_temperature_unit == UnitOfTemperature.FAHRENHEIT
                 and not celsius_type
             )
         ):
             self._attr_temperature_unit = UnitOfTemperature.FAHRENHEIT
             self._current_temperature = fahrenheit_type
         elif celsius_type:
-            self._attr_temperature_unit = UnitOfTemperature.CELSIUS
+            self._attr_temperature_unit = UnitOfTemperature.FAHRENHEIT
             self._current_temperature = celsius_type
 
         # Figure out setting temperature, use preferred unit or what is available
@@ -188,7 +188,7 @@ class SmartLifeClimateEntity(SmartLifeEntity, ClimateEntity):
         if fahrenheit_type and (
             prefered_temperature_unit == UnitOfTemperature.FAHRENHEIT
             or (
-                prefered_temperature_unit == UnitOfTemperature.CELSIUS
+                prefered_temperature_unit == UnitOfTemperature.FAHRENHEIT
                 and not celsius_type
             )
         ):
