@@ -61,12 +61,12 @@ async def async_setup_entry(
         """Discover and add a discovered smartlife vacuum."""
         entities: list[SmartLifeVacuumEntity] = []
         for device_id in device_ids:
-            device = hass_data.device_manager.device_map[device_id]
+            device = hass_data.manager.device_map[device_id]
             if device.category == "sd":
                 entities.append(SmartLifeVacuumEntity(device, hass_data.manager))
         async_add_entities(entities)
 
-    async_discover_device([*hass_data.device_manager.device_map])
+    async_discover_device([*hass_data.manager.device_map])
 
     entry.async_on_unload(
         async_dispatcher_connect(hass, SMART_LIFE_DISCOVERY_NEW, async_discover_device)
