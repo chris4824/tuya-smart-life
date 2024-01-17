@@ -61,12 +61,12 @@ async def async_setup_entry(
         """Discover and add a discovered smartlife vacuum."""
         entities: list[SmartLifeVacuumEntity] = []
         for device_id in device_ids:
-            device = hass_data.manager.device_map[device_id]
+            device = hass_data.device_manager.device_map[device_id]
             if device.category == "sd":
                 entities.append(SmartLifeVacuumEntity(device, hass_data.manager))
         async_add_entities(entities)
 
-    async_discover_device([*hass_data.manager.device_map])
+    async_discover_device([*hass_data.device_manager.device_map])
 
     entry.async_on_unload(
         async_dispatcher_connect(hass, SMART_LIFE_DISCOVERY_NEW, async_discover_device)
@@ -78,6 +78,7 @@ class SmartLifeVacuumEntity(SmartLifeEntity, StateVacuumEntity):
 
     _fan_speed: EnumTypeData | None = None
     _battery_level: IntegerTypeData | None = None
+    _attr_name = None
 
     def __init__(self, device: CustomerDevice, device_manager: Manager) -> None:
         """Init smartlife vacuum."""
@@ -85,7 +86,9 @@ class SmartLifeVacuumEntity(SmartLifeEntity, StateVacuumEntity):
 
         self._attr_fan_speed_list = []
 
-        self._attr_supported_features |= VacuumEntityFeature.SEND_COMMAND
+        self._attr_supported_features = (
+            VacuumEntityFeature.SEND_COMMAND | VacuumEntityFeature.STATE
+        )
         if self.find_dpcode(DPCode.PAUSE, prefer_function=True):
             self._attr_supported_features |= VacuumEntityFeature.PAUSE
 
@@ -100,16 +103,6 @@ class SmartLifeVacuumEntity(SmartLifeEntity, StateVacuumEntity):
 
         if self.find_dpcode(DPCode.SEEK, prefer_function=True):
             self._attr_supported_features |= VacuumEntityFeature.LOCATE
-
-        if self.find_dpcode(DPCode.STATUS, prefer_function=True):
-            self._attr_supported_features |= (
-                VacuumEntityFeature.STATE | VacuumEntityFeature.STATUS
-            )
-
-        if self.find_dpcode(DPCode.POWER, prefer_function=True):
-            self._attr_supported_features |= (
-                VacuumEntityFeature.TURN_ON | VacuumEntityFeature.TURN_OFF
-            )
 
         if self.find_dpcode(DPCode.POWER_GO, prefer_function=True):
             self._attr_supported_features |= (
@@ -150,15 +143,7 @@ class SmartLifeVacuumEntity(SmartLifeEntity, StateVacuumEntity):
             return STATE_PAUSED
         if not (status := self.device.status.get(DPCode.STATUS)):
             return None
-        return SMART_LIFE_STATUS_TO_HA.get(status)
-
-    def turn_on(self, **kwargs: Any) -> None:
-        """Turn the device on."""
-        self._send_command([{"code": DPCode.POWER, "value": True}])
-
-    def turn_off(self, **kwargs: Any) -> None:
-        """Turn the device off."""
-        self._send_command([{"code": DPCode.POWER, "value": False}])
+        return SMARTLIFE_STATUS_TO_HA.get(status)
 
     def start(self, **kwargs: Any) -> None:
         """Start the device."""
@@ -177,7 +162,7 @@ class SmartLifeVacuumEntity(SmartLifeEntity, StateVacuumEntity):
         self._send_command(
             [
                 {"code": DPCode.SWITCH_CHARGE, "value": True},
-                {"code": DPCode.MODE, "value": SMART_LIFE_MODE_RETURN_HOME},
+                {"code": DPCode.MODE, "value": SMARTLIFE_MODE_RETURN_HOME},
             ]
         )
 
