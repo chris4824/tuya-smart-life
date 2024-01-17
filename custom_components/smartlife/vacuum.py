@@ -143,7 +143,7 @@ class SmartLifeVacuumEntity(SmartLifeEntity, StateVacuumEntity):
             return STATE_PAUSED
         if not (status := self.device.status.get(DPCode.STATUS)):
             return None
-        return SMARTLIFE_STATUS_TO_HA.get(status)
+        return SMART_LIFE_STATUS_TO_HA.get(status)
 
     def start(self, **kwargs: Any) -> None:
         """Start the device."""
