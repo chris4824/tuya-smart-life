@@ -162,7 +162,7 @@ class SmartLifeVacuumEntity(SmartLifeEntity, StateVacuumEntity):
         self._send_command(
             [
                 {"code": DPCode.SWITCH_CHARGE, "value": True},
-                {"code": DPCode.MODE, "value": SMARTLIFE_MODE_RETURN_HOME},
+                {"code": DPCode.MODE, "value": SMART_LIFE_MODE_RETURN_HOME},
             ]
         )
 
